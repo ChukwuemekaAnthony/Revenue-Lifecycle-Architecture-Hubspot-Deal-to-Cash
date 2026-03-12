@@ -1,0 +1,50 @@
+---
+title: Revenue Lineage Model — Deal to Margin
+---
+flowchart LR
+    subgraph SALES ["SALES DOMAIN"]
+        D[("DEAL\ndeal_id\ncompany_id\ncontract_value\nexpected_margin")]
+    end
+
+    subgraph CONTRACT ["CONTRACT DOMAIN"]
+        C[("SERVICE CONTRACT\ncontract_id\ndeal_id ← carried\ncompany_id\ncontract_value\ncontracted_margin")]
+    end
+
+    subgraph ASSET ["ASSET LIFECYCLE DOMAIN"]
+        A[("ASSET\nasset_id\ncontract_id ← carried\nserial_number\nlifecycle_stage")]
+        M[("MAINTENANCE EVENT\nmaintenance_event_id\nasset_id ← carried\ncontract_id ← carried\nrepair_cost")]
+    end
+
+    subgraph FINANCIAL ["FINANCIAL DOMAIN"]
+        I[("INVOICE\ninvoice_id\ncontract_id ← carried\ndeal_id ← carried\ninvoice_amount\npayment_status")]
+        CO[("DELIVERY COST\ncost_id\ncontract_id ← carried\ndeal_id ← carried\nlabor_cost\nvendor_cost\nequipment_cost")]
+    end
+
+    subgraph MARGIN ["PROFITABILITY LAYER"]
+        REV["REVENUE\nSUM invoice_amount\nWHERE deal_id = X"]
+        COST["TOTAL COST\nSUM labor + vendor\n+ equipment + overhead\nWHERE deal_id = X"]
+        GM["GROSS MARGIN\nRevenue - Cost"]
+        MP["MARGIN PERCENT\nMargin / Revenue"]
+    end
+
+    D -->|"Closed Won\nAutomation"| C
+    C -->|"contract_id\npropagates"| A
+    A -->|"asset_id\npropagates"| M
+    C -->|"deal_id\npropagates"| I
+    C -->|"deal_id\npropagates"| CO
+    I --> REV
+    CO --> COST
+    REV --> GM
+    COST --> GM
+    GM --> MP
+
+    style D fill:#1e3a5f,color:#fff
+    style C fill:#1e3a5f,color:#fff
+    style A fill:#1a4a3a,color:#fff
+    style M fill:#1a4a3a,color:#fff
+    style I fill:#4a1e3a,color:#fff
+    style CO fill:#4a1e3a,color:#fff
+    style REV fill:#1e4a1a,color:#fff
+    style COST fill:#4a1a1a,color:#fff
+    style GM fill:#2d1e4a,color:#fff
+    style MP fill:#2d1e4a,color:#fff

@@ -1,0 +1,159 @@
+---
+title: Analytical Warehouse — Star Schema
+---
+erDiagram
+
+    dim_date {
+        INT date_key PK
+        DATE full_date
+        INT day_of_week
+        VARCHAR day_name
+        INT week_of_year
+        INT month_number
+        VARCHAR month_name
+        INT quarter
+        INT calendar_year
+        INT fiscal_year
+        BOOLEAN is_weekday
+        BOOLEAN is_month_end
+    }
+
+    dim_company {
+        INT sk_company PK
+        VARCHAR company_id
+        VARCHAR company_name
+        VARCHAR industry
+        VARCHAR region
+        VARCHAR client_status
+        INT bed_count
+        BOOLEAN is_current
+    }
+
+    dim_contract {
+        INT sk_contract PK
+        VARCHAR contract_id
+        VARCHAR fk_deal_id
+        INT sk_company FK
+        VARCHAR contract_status
+        DECIMAL contract_value
+        DECIMAL contracted_margin
+        INT contract_start_date_key FK
+        INT contract_end_date_key FK
+        BOOLEAN is_current
+    }
+
+    dim_asset {
+        INT sk_asset PK
+        VARCHAR asset_id
+        INT sk_facility FK
+        INT sk_contract FK
+        VARCHAR serial_number
+        VARCHAR equipment_type
+        VARCHAR manufacturer
+        VARCHAR lifecycle_stage
+        DECIMAL service_risk_score
+        BOOLEAN is_current
+    }
+
+    dim_facility {
+        INT sk_facility PK
+        VARCHAR facility_id
+        INT sk_company FK
+        VARCHAR facility_name
+        VARCHAR facility_type
+        VARCHAR city
+        VARCHAR state
+    }
+
+    dim_vendor {
+        INT sk_vendor PK
+        VARCHAR vendor_id
+        VARCHAR vendor_name
+        VARCHAR vendor_type
+        VARCHAR region
+        BOOLEAN preferred_vendor
+    }
+
+    dim_contact {
+        INT sk_contact PK
+        VARCHAR contact_id
+        INT sk_company FK
+        VARCHAR full_name
+        VARCHAR role_type
+        VARCHAR decision_authority
+    }
+
+    fact_deal {
+        INT sk_deal_event PK
+        VARCHAR deal_id
+        INT sk_company FK
+        INT sk_contact FK
+        INT created_date_key FK
+        INT closed_won_date_key FK
+        DECIMAL estimated_contract_value
+        DECIMAL final_contract_value
+        DECIMAL weighted_value
+        DECIMAL expected_margin
+        DECIMAL stage_probability
+        VARCHAR deal_stage
+        BOOLEAN is_closed_won
+        INT total_sales_cycle_days
+    }
+
+    fact_invoice {
+        INT sk_invoice PK
+        VARCHAR invoice_id
+        VARCHAR deal_id
+        INT sk_company FK
+        INT sk_contract FK
+        INT invoice_date_key FK
+        INT payment_received_date_key FK
+        DECIMAL invoice_amount
+        DECIMAL total_amount
+        BOOLEAN is_paid
+        BOOLEAN is_overdue
+        INT days_to_payment
+    }
+
+    fact_cost {
+        INT sk_cost PK
+        VARCHAR cost_id
+        VARCHAR deal_id
+        INT sk_contract FK
+        INT cost_recorded_date_key FK
+        DECIMAL labor_cost
+        DECIMAL vendor_cost
+        DECIMAL equipment_cost
+        DECIMAL allocated_overhead
+        DECIMAL total_cost
+    }
+
+    fact_maintenance {
+        INT sk_maintenance PK
+        VARCHAR maintenance_event_id
+        INT sk_asset FK
+        INT sk_vendor FK
+        INT sk_facility FK
+        INT sk_contract FK
+        INT maintenance_date_key FK
+        VARCHAR maintenance_type
+        DECIMAL downtime_hours
+        DECIMAL repair_cost
+        BOOLEAN billable_flag
+        INT days_since_last_service
+    }
+
+    dim_company ||--o{ fact_deal : "sk_company"
+    dim_company ||--o{ fact_invoice : "sk_company"
+    dim_contact ||--o{ fact_deal : "sk_contact"
+    dim_contract ||--o{ fact_invoice : "sk_contract"
+    dim_contract ||--o{ fact_cost : "sk_contract"
+    dim_contract ||--o{ fact_maintenance : "sk_contract"
+    dim_asset ||--o{ fact_maintenance : "sk_asset"
+    dim_vendor ||--o{ fact_maintenance : "sk_vendor"
+    dim_facility ||--o{ fact_maintenance : "sk_facility"
+    dim_date ||--o{ fact_deal : "created_date_key"
+    dim_date ||--o{ fact_invoice : "invoice_date_key"
+    dim_date ||--o{ fact_cost : "cost_recorded_date_key"
+    dim_date ||--o{ fact_maintenance : "maintenance_date_key"
+    dim_date ||--o{ dim_contract : "contract_start_date_key"

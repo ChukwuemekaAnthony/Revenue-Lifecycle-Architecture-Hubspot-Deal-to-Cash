@@ -1,0 +1,48 @@
+---
+title: CRM Revenue Lifecycle — Pipeline Flow Diagram
+---
+flowchart TD
+    A([Lead Identified\n5%]) --> B([Qualification\n15%])
+    B --> C([Discovery and Assessment\n30%])
+    C --> D([Solution Design\n50%])
+    D --> E([Proposal Submitted\n65%])
+    E --> F([Negotiation\n80%])
+    F --> G([Contract Pending Signature\n90%])
+    G --> H{Decision}
+    H -->|Won| I([Closed Won\n100%])
+    H -->|Lost| J([Closed Lost\n0%])
+
+    I -->|Automation Trigger| K([Contract Initiated])
+    K --> L([Asset Inventory Phase])
+    L --> M([Vendor Alignment Phase])
+    M --> N([Service Deployment])
+    N --> O([Active Operations])
+    O -->|90 days before end| P{Renewal?}
+    P -->|Yes| Q([Contract Renewed])
+    P -->|No| R([Contract Terminated])
+
+    O --> S([Service Request Logged])
+    S --> T([Technician Assigned])
+    T --> U([Service In Progress])
+    U --> V([Repair Completed])
+    V --> W([Validation Completed])
+    W --> X([Event Closed])
+
+    X -->|Billable check| Y([Invoice Generated])
+    Y --> Z([Invoice Delivered])
+    Z --> AA([Payment Pending])
+    AA -->|Paid| AB([Payment Received])
+    AA -->|Overdue| AC([Overdue])
+    AC --> AD([Collections])
+
+    AB -->|With cost records| AE([Margin Calculated])
+
+    style I fill:#22c55e,color:#fff
+    style J fill:#ef4444,color:#fff
+    style O fill:#3b82f6,color:#fff
+    style AB fill:#22c55e,color:#fff
+    style AE fill:#8b5cf6,color:#fff
+    style AC fill:#f59e0b,color:#fff
+    style AD fill:#ef4444,color:#fff
+    style Q fill:#22c55e,color:#fff
+    style R fill:#ef4444,color:#fff

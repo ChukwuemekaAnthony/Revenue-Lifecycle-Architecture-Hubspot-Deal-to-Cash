@@ -1,0 +1,157 @@
+---
+title: CRM Revenue Lifecycle — Entity Relationship Diagram
+---
+erDiagram
+    COMPANY {
+        UUID company_id PK
+        VARCHAR company_name
+        VARCHAR parent_health_system
+        VARCHAR industry
+        VARCHAR region
+        INT bed_count
+        INT facility_count
+        VARCHAR client_status
+        DECIMAL annual_equipment_budget
+        DATE first_contract_date
+    }
+
+    CONTACT {
+        UUID contact_id PK
+        UUID company_id FK
+        VARCHAR first_name
+        VARCHAR last_name
+        VARCHAR email
+        VARCHAR role_type
+        VARCHAR decision_authority
+        VARCHAR department
+    }
+
+    DEAL {
+        UUID deal_id PK
+        UUID company_id FK
+        UUID contact_id FK
+        VARCHAR deal_name
+        VARCHAR deal_stage
+        DECIMAL estimated_contract_value
+        DECIMAL final_contract_value
+        DECIMAL expected_margin
+        DATE closed_won_date
+        DATE closed_lost_date
+        VARCHAR loss_reason
+    }
+
+    SERVICE_CONTRACT {
+        UUID contract_id PK
+        UUID deal_id FK
+        UUID company_id FK
+        VARCHAR contract_name
+        VARCHAR contract_status
+        DECIMAL contract_value
+        DECIMAL contracted_margin
+        VARCHAR service_model
+        VARCHAR sla_type
+        DATE contract_start_date
+        DATE contract_end_date
+    }
+
+    FACILITY {
+        UUID facility_id PK
+        UUID company_id FK
+        VARCHAR facility_name
+        VARCHAR facility_type
+        VARCHAR city
+        VARCHAR state
+        VARCHAR zip_code
+    }
+
+    ASSET {
+        UUID asset_id PK
+        UUID facility_id FK
+        UUID contract_id FK
+        UUID company_id FK
+        VARCHAR serial_number
+        VARCHAR equipment_type
+        VARCHAR manufacturer
+        VARCHAR model_number
+        VARCHAR lifecycle_stage
+        DECIMAL utilization_rate
+        DECIMAL service_risk_score
+        DATE installation_date
+        DATE warranty_expiration
+        DATE replacement_due_date
+    }
+
+    VENDOR {
+        UUID vendor_id PK
+        VARCHAR vendor_name
+        VARCHAR vendor_type
+        VARCHAR region
+        BOOLEAN preferred_vendor
+    }
+
+    VENDOR_SERVICE_CONTRACT {
+        UUID vendor_contract_id PK
+        UUID vendor_id FK
+        UUID asset_id FK
+        UUID contract_id FK
+        DECIMAL vendor_service_cost
+        VARCHAR service_frequency
+        TEXT sla_terms
+    }
+
+    MAINTENANCE_EVENT {
+        UUID maintenance_event_id PK
+        UUID asset_id FK
+        UUID vendor_id FK
+        UUID facility_id FK
+        UUID contract_id FK
+        VARCHAR maintenance_type
+        VARCHAR work_order_number
+        DECIMAL downtime_hours
+        DECIMAL repair_cost
+        BOOLEAN billable_flag
+        DATE maintenance_date
+        DATE next_service_due_date
+    }
+
+    INVOICE {
+        UUID invoice_id PK
+        UUID contract_id FK
+        UUID deal_id FK
+        UUID company_id FK
+        VARCHAR invoice_number
+        DECIMAL invoice_amount
+        VARCHAR payment_status
+        DATE invoice_date
+        DATE payment_due_date
+        DATE payment_received_date
+    }
+
+    DELIVERY_COST {
+        UUID cost_id PK
+        UUID contract_id FK
+        UUID deal_id FK
+        VARCHAR cost_category
+        DECIMAL labor_cost
+        DECIMAL vendor_cost
+        DECIMAL equipment_cost
+        DECIMAL allocated_overhead
+        DECIMAL total_cost
+        DATE cost_recorded_date
+    }
+
+    COMPANY ||--o{ CONTACT : "has"
+    COMPANY ||--o{ DEAL : "has"
+    COMPANY ||--o{ FACILITY : "has"
+    COMPANY ||--o{ SERVICE_CONTRACT : "has"
+    CONTACT }o--o{ DEAL : "associated with"
+    DEAL ||--o| SERVICE_CONTRACT : "generates"
+    SERVICE_CONTRACT ||--o{ FACILITY : "covers"
+    FACILITY ||--o{ ASSET : "contains"
+    ASSET ||--o{ MAINTENANCE_EVENT : "has"
+    ASSET ||--o{ VENDOR_SERVICE_CONTRACT : "covered by"
+    VENDOR ||--o{ VENDOR_SERVICE_CONTRACT : "provides"
+    VENDOR ||--o{ MAINTENANCE_EVENT : "services"
+    SERVICE_CONTRACT ||--o{ INVOICE : "billed as"
+    SERVICE_CONTRACT ||--o{ DELIVERY_COST : "incurs"
+    SERVICE_CONTRACT ||--o{ VENDOR_SERVICE_CONTRACT : "under"
